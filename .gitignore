@@ -1,0 +1,23 @@
+# Local operating system files
+.DS_Store
+Thumbs.db
+
+# Editor settings
+.vscode/
+.idea/
+
+# Terraform local state and providers
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Azure CLI and generated deployment outputs
+*.deployment.json
+*.parameters.local.json
+
+# Logs and temporary files
+*.log
+*.tmp
+tmp/
+temp/
