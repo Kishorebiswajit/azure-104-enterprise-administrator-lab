@@ -1,0 +1,28 @@
+flowchart TB
+    Admin["Admin / Owner account"]
+    Reader["reader@Kishoree.onmicrosoft.com"]
+    PublicIP["Allowed public IP<br/>152.57.125.49"]
+
+    subgraph StorageRG["RG-AZ104-Storage"]
+        SA["Storage account<br/>Standard LRS, Hot tier"]
+        Firewall["Networking<br/>Selected VNets and IPs"]
+        BlobService["Blob service"]
+        Container["application-files<br/>Private container"]
+        Protection["Data protection<br/>Blob soft delete 7 days<br/>Container soft delete 7 days<br/>Blob versioning enabled"]
+    end
+
+    subgraph NetworkRG["RG-AZ104-Network"]
+        MgmtSubnet["Management subnet"]
+        AppSubnet["App subnet"]
+    end
+
+    Admin --> PublicIP
+    PublicIP --> Firewall
+    MgmtSubnet --> Firewall
+    AppSubnet --> Firewall
+    Firewall --> SA
+    SA --> BlobService
+    BlobService --> Container
+    SA --> Protection
+    Reader -->|"Storage Blob Data Reader<br/>read/download allowed"| Container
+    Reader -. "upload denied with Entra auth" .-> Container

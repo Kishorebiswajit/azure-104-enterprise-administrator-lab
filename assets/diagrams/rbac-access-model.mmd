@@ -1,0 +1,28 @@
+flowchart TB
+    Sub["Azure Subscription"]
+    Owner["KishoreJena@Kishoree.onmicrosoft.com<br/>Owner"]
+    Reader["reader@Kishoree.onmicrosoft.com<br/>Reader + Storage Blob Data Reader"]
+    VMOp["vm-operator@Kishoree.onmicrosoft.com<br/>Virtual Machine Contributor"]
+    NetAdmin["Network admin<br/>Network administration role pattern"]
+
+    ComputeRG["RG-AZ104-COMPUTE"]
+    NetworkRG["RG-AZ104-Network"]
+    Storage["Storage account<br/>Blob data plane"]
+    VMs["Management / Web / App VMs"]
+    VNet["VNet-AZ104-Enterprise"]
+    Blob["application-files container"]
+
+    Sub --> ComputeRG
+    Sub --> NetworkRG
+    Sub --> Storage
+    Owner --> Sub
+    VMOp --> ComputeRG
+    NetAdmin --> NetworkRG
+    Reader --> Sub
+    Reader --> Storage
+    ComputeRG --> VMs
+    NetworkRG --> VNet
+    Storage --> Blob
+
+    VMOp -. denied network read .-> NetworkRG
+    Reader -. upload denied with Entra auth .-> Blob

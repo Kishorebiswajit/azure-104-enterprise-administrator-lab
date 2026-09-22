@@ -1,0 +1,26 @@
+flowchart LR
+    Mgmt["VM-AZ104-Management"]
+    Web["VM-AZ104-Web"]
+    App["VM-AZ104-App"]
+
+    AMA["AzureMonitorLinuxAgent<br/>Installed on all VMs"]
+    DCR["DCR-AZ104-Linux<br/>Microsoft-Perf<br/>Microsoft-Syslog"]
+    LAW["LAW-AZ104-Enterprise"]
+    Alerts["Metric alerts<br/>CPU > 80%"]
+    AG["AG-AZ104-Alerts<br/>Email receiver"]
+
+    Mgmt --> AMA
+    Web --> AMA
+    App --> AMA
+    AMA --> DCR
+    DCR --> LAW
+    LAW --> Alerts
+    Alerts --> AG
+
+    AppAlert["Alert-AZ104-App-HighCPU"]
+    WebAlert["Alert-AZ104-Web-HighCPU"]
+    MgmtAlert["Alert-AZ104-Management-HighCPU"]
+
+    Alerts --> AppAlert
+    Alerts --> WebAlert
+    Alerts --> MgmtAlert

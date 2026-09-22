@@ -1,0 +1,44 @@
+flowchart TB
+    subgraph Sub["Azure Subscription"]
+        subgraph NetRG["RG-AZ104-Network"]
+            VNet["VNet-AZ104-Enterprise<br/>10.10.0.0/16"]
+            MgmtSubnet["Management subnet"]
+            WebSubnet["Web subnet"]
+            AppSubnet["App subnet"]
+            Bastion["Azure Bastion"]
+            NAT["NAT Gateway"]
+            NSG["NSGs"]
+            LAW["LAW-AZ104-Enterprise"]
+            DCR["DCR-AZ104-Linux"]
+            AG["AG-AZ104-Alerts"]
+        end
+
+        subgraph ComputeRG["RG-AZ104-COMPUTE"]
+            MgmtVM["VM-AZ104-Management"]
+            WebVM["VM-AZ104-Web<br/>Nginx"]
+            AppVM["VM-AZ104-App<br/>Python app"]
+        end
+
+        subgraph StorageRG["RG-AZ104-Storage"]
+            Storage["Storage account"]
+            Blob["application-files<br/>Private container"]
+        end
+    end
+
+    VNet --> MgmtSubnet
+    VNet --> WebSubnet
+    VNet --> AppSubnet
+    MgmtSubnet --> MgmtVM
+    WebSubnet --> WebVM
+    AppSubnet --> AppVM
+    Bastion --> MgmtVM
+    NAT --> VNet
+    NSG --> VNet
+    WebVM --> AppVM
+    AppVM --> Blob
+    MgmtVM --> DCR
+    WebVM --> DCR
+    AppVM --> DCR
+    DCR --> LAW
+    LAW --> AG
+    Storage --> Blob

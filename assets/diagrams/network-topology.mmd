@@ -1,0 +1,39 @@
+flowchart LR
+    Internet["Internet / Admin client"]
+    PublicIP["Allowed public client IP<br/>152.57.125.49"]
+
+    subgraph NetRG["RG-AZ104-Network"]
+        VNet["VNet-AZ104-Enterprise<br/>10.10.0.0/16"]
+        MgmtSubnet["Management subnet"]
+        WebSubnet["Web subnet"]
+        AppSubnet["App subnet"]
+        Bastion["Bastion"]
+        NAT["NAT Gateway"]
+        NSG["NSGs"]
+    end
+
+    subgraph ComputeRG["RG-AZ104-COMPUTE"]
+        MgmtVM["VM-AZ104-Management"]
+        WebVM["VM-AZ104-Web"]
+        AppVM["VM-AZ104-App<br/>No public IP"]
+    end
+
+    subgraph StorageRG["RG-AZ104-Storage"]
+        Storage["Storage account firewall<br/>Selected networks and IPs"]
+        Blob["application-files"]
+    end
+
+    Internet --> Bastion
+    PublicIP --> Storage
+    Bastion --> MgmtVM
+    VNet --> MgmtSubnet
+    VNet --> WebSubnet
+    VNet --> AppSubnet
+    MgmtSubnet --> MgmtVM
+    WebSubnet --> WebVM
+    AppSubnet --> AppVM
+    NSG --> VNet
+    NAT --> VNet
+    WebVM --> AppVM
+    AppVM --> Storage
+    Storage --> Blob
