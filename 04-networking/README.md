@@ -2,6 +2,19 @@
 
 Labs for Azure virtual networking, secure traffic flow, load balancing, name resolution, and hybrid connectivity.
 
+## Implemented lab
+
+The current project includes:
+
+- `VNet-AZ104-Enterprise`
+- Three segmented subnets.
+- NAT Gateway.
+- Azure Bastion Developer SKU.
+- Three subnet-level NSGs.
+- Validated management-to-app SSH and web-to-app TCP/8080 paths.
+
+See the [implemented VNet documentation](virtual-networks/README.md) and [NSG documentation](network-security-groups/README.md) for the current configuration and validation results.
+
 ## Folders
 
 | Path | Purpose |
