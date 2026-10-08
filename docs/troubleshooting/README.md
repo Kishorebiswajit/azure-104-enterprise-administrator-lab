@@ -10,23 +10,11 @@ The private Blob container returned a 403-style authorization/network error afte
 
 ### Cause
 
-The user's local machine was not allowed by the storage firewall.
-
-Azure identified the public client IP as:
-
-```text
-152.57.125.49
-```
-
-The local machine's private Wi-Fi IP was:
-
-```text
-10.33.83.77
-```
+The lab client was not allowed by the storage firewall.
 
 ### Resolution
 
-The public IP seen by Azure was added to the storage firewall. The private LAN IP was not used because Azure Storage cannot see that address across the public internet.
+The approved public client IP used by the lab was added to the storage firewall. The actual IP is intentionally omitted from this public repository.
 
 ### Lesson
 
@@ -40,21 +28,79 @@ Authentication and network authorization are separate. A user can have correct A
 
 ### Cause
 
-The portal was using storage account access key authentication for the blob operation instead of Microsoft Entra user authentication.
+The portal was using storage account access key authentication instead of Microsoft Entra user authentication.
 
 ### Resolution
 
-The test was repeated using:
-
-```text
-Authentication method: Microsoft Entra user account
-```
-
-With Entra authorization, the reader role correctly allowed read access and denied upload/write access.
+The test was repeated using Microsoft Entra user authentication. Read/download succeeded while upload and delete were denied.
 
 ### Lesson
 
-Always confirm the authentication method when testing storage RBAC. Access key authentication is not a valid proof of Entra/RBAC permissions.
+Always confirm the authentication method when testing storage RBAC.
+
+## Web VM had no outbound internet access
+
+### Symptom
+
+Package installation/update commands from `VM-AZ104-Web` initially timed out.
+
+### Cause
+
+The workload subnet had outbound access disabled without a NAT Gateway providing explicit outbound connectivity.
+
+### Resolution
+
+A NAT Gateway was deployed and associated with the workload subnet. Package installation and Nginx maintenance then worked.
+
+### Lesson
+
+When subnet default outbound access is disabled, provide an explicit outbound path such as NAT Gateway.
+
+## App VM was initially exposed by a public IP
+
+### Symptom
+
+The app VM temporarily had a public IP during early configuration.
+
+### Resolution
+
+The public IP was detached/deleted. The app tier now uses private addressing only, with private management access through the VNet/Bastion path.
+
+### Lesson
+
+Application tiers that do not require direct internet ingress should not retain unnecessary public IP exposure.
+
+## SSH private-key permissions on Windows
+
+### Symptom
+
+Windows SSH rejected the VM private key because the key file permissions were too broad.
+
+### Resolution
+
+The private-key file ACL was restricted to the required Windows user before retrying SSH.
+
+### Lesson
+
+OpenSSH private keys must be protected with appropriate filesystem permissions.
+
+## Bastion Developer SKU one-session behavior
+
+### Symptom
+
+Opening another Bastion Developer connection disconnected the previous VM session.
+
+### Cause
+
+Bastion Developer uses shared infrastructure and supports one active VM connection at a time.
+
+### Resolution
+
+The behavior was treated as a SKU limitation rather than a VM/network failure. Private SSH was also used for management-to-app administration.
+
+### Lesson
+
+Know the capabilities and limitations of the Bastion SKU selected for a lab.
 
 ## Data Collection Rule creation syntax
 
@@ -64,17 +110,17 @@ The Azure CLI failed to parse the `--destinations` argument while creating `DCR-
 
 ### Resolution
 
-A JSON definition method was used for the Data Collection Rule instead of relying on the direct argument format.
+A JSON definition file was used to create the Data Collection Rule.
 
 ### Lesson
 
-Azure CLI syntax can vary by version and extension. When a structured argument fails, a JSON definition file can be more reliable.
+When structured Azure CLI arguments fail, a JSON definition can be a reliable alternative.
 
 ## DCR association listing error
 
 ### Symptom
 
-Listing DCR associations returned an extension error about a missing `resourceUri`.
+Listing DCR associations returned a CLI extension error about a missing `resourceUri`.
 
 ### Resolution
 
@@ -82,22 +128,18 @@ The association was verified using the resource-specific command instead of the 
 
 ### Lesson
 
-An Azure CLI extension error does not always mean the Azure resource failed. Verify using another resource-specific query before changing working infrastructure.
+A CLI extension error does not necessarily mean the Azure resource failed. Verify the resource directly before changing working infrastructure.
 
 ## Action Group email receiver syntax
 
 ### Symptom
 
-Updating the action group with a raw `emailReceivers` structure failed because the request content was missing `emailAddress`.
+Updating the Action Group with a raw `emailReceivers` structure failed because the request content was missing `emailAddress`.
 
 ### Resolution
 
-The email receiver was added using:
-
-```text
-az monitor action-group update --add-action email ...
-```
+The email receiver was added using the CLI-supported `--add-action email` syntax.
 
 ### Lesson
 
-Use the CLI-supported action helper syntax for Action Group receivers when direct object updates fail.
+Use the CLI-supported helper syntax for Action Group receivers when direct object updates fail.
