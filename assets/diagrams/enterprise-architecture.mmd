@@ -2,25 +2,25 @@ flowchart TB
     subgraph Sub["Azure Subscription"]
         subgraph NetRG["RG-AZ104-Network"]
             VNet["VNet-AZ104-Enterprise<br/>10.10.0.0/16"]
-            MgmtSubnet["Management subnet"]
-            WebSubnet["Web subnet"]
-            AppSubnet["App subnet"]
-            Bastion["Azure Bastion"]
+            MgmtSubnet["snet-management<br/>10.10.0.0/24"]
+            WebSubnet["snet-workload<br/>10.10.1.0/24"]
+            AppSubnet["snet-app<br/>10.10.2.0/24"]
+            Bastion["Azure Bastion<br/>Developer SKU"]
             NAT["NAT Gateway"]
-            NSG["NSGs"]
+            NSGs["NSGs"]
             LAW["LAW-AZ104-Enterprise"]
             DCR["DCR-AZ104-Linux"]
             AG["AG-AZ104-Alerts"]
         end
 
         subgraph ComputeRG["RG-AZ104-COMPUTE"]
-            MgmtVM["VM-AZ104-Management"]
-            WebVM["VM-AZ104-Web<br/>Nginx"]
-            AppVM["VM-AZ104-App<br/>Python app"]
+            MgmtVM["VM-AZ104-Management<br/>10.10.0.4"]
+            WebVM["VM-AZ104-Web<br/>10.10.1.4<br/>Nginx"]
+            AppVM["VM-AZ104-App<br/>10.10.2.4<br/>Python :8080<br/>Private only"]
         end
 
         subgraph StorageRG["RG-AZ104-Storage"]
-            Storage["Storage account"]
+            Storage["Storage account<br/>Standard LRS, Hot"]
             Blob["application-files<br/>Private container"]
         end
     end
@@ -32,9 +32,10 @@ flowchart TB
     WebSubnet --> WebVM
     AppSubnet --> AppVM
     Bastion --> MgmtVM
-    NAT --> VNet
-    NSG --> VNet
-    WebVM --> AppVM
+    NAT --> WebSubnet
+    NSGs --> VNet
+    MgmtVM -->|"SSH 22"| AppVM
+    WebVM -->|"HTTP 8080"| AppVM
     AppVM --> Blob
     MgmtVM --> DCR
     WebVM --> DCR
