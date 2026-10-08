@@ -11,15 +11,8 @@ flowchart TB
         Protection["Data protection<br/>Blob soft delete 7 days<br/>Container soft delete 7 days<br/>Azure Files soft delete 7 days<br/>Blob versioning disabled"]
     end
 
-    subgraph NetworkRG["RG-AZ104-Network"]
-        MgmtSubnet["Management subnet"]
-        AppSubnet["App subnet"]
-    end
-
     Admin --> Client
     Client --> Firewall
-    MgmtSubnet --> Firewall
-    AppSubnet --> Firewall
     Firewall --> SA
     SA --> BlobService
     BlobService --> Container
