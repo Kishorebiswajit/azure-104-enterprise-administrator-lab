@@ -1,39 +1,41 @@
 flowchart LR
     Internet["Internet / Admin client"]
-    PublicIP["Allowed public client IP<br/>152.57.125.49"]
 
     subgraph NetRG["RG-AZ104-Network"]
         VNet["VNet-AZ104-Enterprise<br/>10.10.0.0/16"]
-        MgmtSubnet["Management subnet"]
-        WebSubnet["Web subnet"]
-        AppSubnet["App subnet"]
-        Bastion["Bastion"]
+        MgmtSubnet["snet-management<br/>10.10.0.0/24"]
+        WebSubnet["snet-workload<br/>10.10.1.0/24"]
+        AppSubnet["snet-app<br/>10.10.2.0/24"]
+        Bastion["Azure Bastion<br/>Developer SKU"]
         NAT["NAT Gateway"]
-        NSG["NSGs"]
+        MgmtNSG["NSG-AZ104-Management"]
+        WebNSG["NSG-AZ104-Workload"]
+        AppNSG["NSG-AZ104-App"]
     end
 
     subgraph ComputeRG["RG-AZ104-COMPUTE"]
-        MgmtVM["VM-AZ104-Management"]
-        WebVM["VM-AZ104-Web"]
-        AppVM["VM-AZ104-App<br/>No public IP"]
+        MgmtVM["VM-AZ104-Management<br/>10.10.0.4"]
+        WebVM["VM-AZ104-Web<br/>10.10.1.4"]
+        AppVM["VM-AZ104-App<br/>10.10.2.4<br/>No public IP"]
     end
 
     subgraph StorageRG["RG-AZ104-Storage"]
-        Storage["Storage account firewall<br/>Selected networks and IPs"]
-        Blob["application-files"]
+        Storage["Storage account"]
+        Blob["application-files<br/>Private"]
     end
 
     Internet --> Bastion
-    PublicIP --> Storage
-    Bastion --> MgmtVM
     VNet --> MgmtSubnet
     VNet --> WebSubnet
     VNet --> AppSubnet
     MgmtSubnet --> MgmtVM
     WebSubnet --> WebVM
     AppSubnet --> AppVM
-    NSG --> VNet
-    NAT --> VNet
-    WebVM --> AppVM
+    MgmtNSG --> MgmtSubnet
+    WebNSG --> WebSubnet
+    AppNSG --> AppSubnet
+    NAT --> WebSubnet
+    MgmtVM -->|"SSH 22"| AppVM
+    WebVM -->|"HTTP 8080"| AppVM
     AppVM --> Storage
     Storage --> Blob
