@@ -36,6 +36,9 @@ The completed implementation currently covers:
 - Storage firewall/network access testing.
 - Blob soft delete, container soft delete, and Azure Files soft delete configured for 7 days.
 - Microsoft Entra/RBAC validation for `Storage Blob Data Reader`.
+- Storage account `kishorestorage1` Private Endpoint `PE-AZ104-Storage` in `snet-app` with private IP `10.10.2.5`.
+- Private DNS zone `privatelink.blob.core.windows.net` linked to `VNet-AZ104-Enterprise`.
+- Verified App VM DNS resolution and authenticated Blob data-plane access through the private path.
 
 > **Documentation correction:** Blob versioning was checked during the lab and was **not enabled**. Any older documentation claiming otherwise has been corrected.
 
@@ -61,6 +64,7 @@ Diagram source files are stored in [`assets/diagrams`](assets/diagrams):
 - [Monitoring implementation](05-monitoring-and-maintenance/azure-monitor/README.md)
 - [Blob Storage implementation](02-storage/blob-storage/README.md)
 - [Storage security notes](02-storage/security/README.md)
+- [Storage private endpoint](02-storage/private-endpoint/README.md)
 - [Storage lifecycle and data protection](02-storage/lifecycle-management/README.md)
 - [Troubleshooting notes](docs/troubleshooting/README.md)
 
@@ -86,7 +90,6 @@ Diagram source files are stored in [`assets/diagrams`](assets/diagrams):
 
 The following remain future milestones and are not represented as completed Azure resources:
 
-- Storage private endpoint and Private DNS.
 - SAS-based temporary Blob access.
 - Backup and restore testing.
 - Azure Policy, locks, and tagging enforcement.
