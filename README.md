@@ -2,33 +2,42 @@
 
 Hands-on Azure Administrator lab aligned with AZ-104 objectives and enterprise administration workflows.
 
-This repository documents the Azure environment built during the lab so far: enterprise-style resource organization, a three-tier VM architecture, least-privilege RBAC, Azure Monitor/Log Analytics, CPU alerting, and secure Blob Storage access testing.
+This repository documents the Azure environment actually built and validated during the lab: enterprise resource organization, a three-tier Linux VM architecture, NSG segmentation, NAT Gateway, Bastion, least-privilege RBAC, Azure Monitor/Log Analytics, CPU alerting, and secure Blob Storage access testing.
 
 ## Current lab milestone
 
-The current completed milestone covers:
+The completed implementation currently covers:
 
-- Resource group separation for network, compute, and storage workloads.
-- `VNet-AZ104-Enterprise` in `RG-AZ104-Network` with three subnets for management, web, and app tiers.
-- Three Linux VMs in `RG-AZ104-COMPUTE`:
-  - `VM-AZ104-Management`
-  - `VM-AZ104-Web`
-  - `VM-AZ104-App`
-- NSG-based segmentation, NAT Gateway, and Bastion as part of the network foundation.
-- Private tier-to-tier communication between the web and app tiers.
-- Public IP removal from the app VM.
-- Nginx web tier and Python app tier configured as part of the workload.
+- Separate resource groups for network, compute, storage, and operations.
+- `VNet-AZ104-Enterprise` in `RG-AZ104-Network` with:
+  - `snet-management` — `10.10.0.0/24`
+  - `snet-workload` — `10.10.1.0/24`
+  - `snet-app` — `10.10.2.0/24`
+- Three Ubuntu Linux VMs in `RG-AZ104-COMPUTE`:
+  - `VM-AZ104-Management` — `10.10.0.4`
+  - `VM-AZ104-Web` — `10.10.1.4`
+  - `VM-AZ104-App` — `10.10.2.4`
+- NSG-based segmentation for management, workload, and app traffic.
+- NAT Gateway for outbound connectivity from the workload subnet.
+- Azure Bastion Developer SKU for private VM administration.
+- Web tier running Nginx on TCP/80.
+- App tier running a Python HTTP service on TCP/8080 under systemd.
+- Private Web → App TCP/8080 communication.
+- App VM public IP removed; app tier is private.
+- Management → App SSH validation through the private network.
 - Least-privilege RBAC validation for VM operator, network admin, reader, and owner access patterns.
 - Azure Monitor Agent installed on all three VMs.
 - `LAW-AZ104-Enterprise` Log Analytics workspace.
-- `DCR-AZ104-Linux` Data Collection Rule collecting Linux performance and syslog streams.
+- `DCR-AZ104-Linux` collecting `Microsoft-Perf` and `Microsoft-Syslog`.
 - DCR associations for management, web, and app VMs.
 - `AG-AZ104-Alerts` action group with email notification.
-- CPU metric alerts for all three VMs.
+- CPU alerts for all three VMs with an average CPU threshold above 80%.
 - Storage account in `RG-AZ104-Storage` with private Blob container `application-files`.
 - Storage firewall/network access testing.
-- Blob soft delete, container soft delete, and blob versioning enabled.
-- Storage Blob Data Reader access validated for `reader@Kishoree.onmicrosoft.com`.
+- Blob soft delete, container soft delete, and Azure Files soft delete configured for 7 days.
+- Microsoft Entra/RBAC validation for `Storage Blob Data Reader`.
+
+> **Documentation correction:** Blob versioning was checked during the lab and was **not enabled**. Any older documentation claiming otherwise has been corrected.
 
 ## Architecture diagrams
 
@@ -40,12 +49,14 @@ Diagram source files are stored in [`assets/diagrams`](assets/diagrams):
 - [`monitoring-architecture.mmd`](assets/diagrams/monitoring-architecture.mmd)
 - [`storage-architecture.mmd`](assets/diagrams/storage-architecture.mmd)
 
-These are Mermaid diagrams so they can be rendered directly by GitHub and reused in documentation.
-
 ## Key documentation
 
+- [Current implementation state](docs/current-state.md)
 - [Architecture overview](docs/architecture/README.md)
 - [Enterprise foundation scenario](07-end-to-end-scenarios/enterprise-foundation/README.md)
+- [VM implementation](03-compute/virtual-machines/README.md)
+- [Virtual networking implementation](04-networking/virtual-networks/README.md)
+- [NSG implementation and validation](04-networking/network-security-groups/README.md)
 - [RBAC implementation](01-identity-and-governance/rbac/README.md)
 - [Monitoring implementation](05-monitoring-and-maintenance/azure-monitor/README.md)
 - [Blob Storage implementation](02-storage/blob-storage/README.md)
@@ -71,20 +82,13 @@ These are Mermaid diagrams so they can be rendered directly by GitHub and reused
 | `templates/` | Lab guide, checklist, and naming templates for new exercises. |
 | `evidence/` | Completion records, assessment notes, and cost reports. |
 
-## Suggested workflow
-
-1. Complete `00-setup` before starting domain labs.
-2. Copy `templates/lab-guide/LAB_TEMPLATE.md` into the relevant module folder for each new exercise.
-3. Capture screenshots and command output in `evidence/` as each lab is completed.
-4. Keep infrastructure code in `06-automation-and-iac/` and link it from the matching lab guide.
-5. Record clean-up steps for every deployed resource to control Azure spend.
-
 ## Not yet implemented
 
-The following topics were discussed as future lab items but are not documented as completed resources yet:
+The following remain future milestones and are not represented as completed Azure resources:
 
 - Storage private endpoint and Private DNS.
 - SAS-based temporary Blob access.
 - Backup and restore testing.
 - Azure Policy, locks, and tagging enforcement.
 - Infrastructure as Code conversion.
+- Additional load balancing and hybrid connectivity scenarios.
