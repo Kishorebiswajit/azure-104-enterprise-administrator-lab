@@ -12,28 +12,17 @@ Scope: Selected virtual networks and IP addresses
 Routing: Microsoft network routing
 ```
 
-The intended allowed Azure network paths were:
+The lab used selected Azure network paths and an approved client public IP for testing. The exact selected network/IP list is intentionally not reproduced here because it was not captured as a stable project artifact.
 
-- Management subnet.
-- App subnet.
-
-The web subnet was not required for storage access in the current design.
+> Security note: real client public IP addresses are intentionally omitted from this public repository.
 
 ## Firewall troubleshooting
 
-When the storage firewall blocked the user's computer, Azure returned a 403-style authorization/network error and identified the public client IP:
+When the storage firewall blocked the lab client, Azure returned a 403-style authorization/network error.
 
-```text
-152.57.125.49
-```
+The important finding was that Azure Storage evaluates the **public client IP visible to the service**, not the client's private LAN address behind NAT.
 
-The local private Wi-Fi IP was:
-
-```text
-10.33.83.77
-```
-
-The lab confirmed that the storage firewall needs the public IP seen by Azure, not the private LAN address behind NAT.
+The public repository therefore does not contain the actual client IP used during testing.
 
 ## Authentication methods
 
@@ -44,23 +33,19 @@ Two authentication paths were observed during testing:
 | Storage account access key | Broad storage access; not a valid test of reader RBAC permissions. |
 | Microsoft Entra user account | Correct method for validating Azure RBAC data-plane permissions. |
 
-The final RBAC test used:
-
-```text
-Authentication method: Microsoft Entra user account
-```
+The final RBAC test used Microsoft Entra user authentication.
 
 ## Data-plane RBAC
 
 `reader@Kishoree.onmicrosoft.com` was assigned `Storage Blob Data Reader` at the storage account.
 
-Expected behavior:
+Expected and validated behavior:
 
 | Operation | Result |
 | --- | --- |
-| View/download blobs | Allowed. |
-| Upload blobs | Denied. |
-| Delete blobs | Denied. |
+| View/download blobs | Allowed |
+| Upload blobs | Denied |
+| Delete blobs | Denied |
 
 This proved the difference between read-only blob data access and contributor-level write access.
 
