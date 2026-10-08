@@ -1,45 +1,50 @@
 flowchart TB
-    subgraph Sub["Azure Subscription"]
+    subgraph Subscription["Azure Subscription"]
         subgraph NetRG["RG-AZ104-Network"]
             VNet["VNet-AZ104-Enterprise<br/>10.10.0.0/16"]
-            MgmtSubnet["snet-management<br/>10.10.0.0/24"]
-            WebSubnet["snet-workload<br/>10.10.1.0/24"]
-            AppSubnet["snet-app<br/>10.10.2.0/24"]
+            Mgmt["snet-management<br/>10.10.0.0/24"]
+            Web["snet-workload<br/>10.10.1.0/24"]
+            App["snet-app<br/>10.10.2.0/24"]
             Bastion["Azure Bastion<br/>Developer SKU"]
             NAT["NAT Gateway"]
-            NSGs["NSGs"]
+            NSGs["Network Security Groups"]
             LAW["LAW-AZ104-Enterprise"]
             DCR["DCR-AZ104-Linux"]
             AG["AG-AZ104-Alerts"]
         end
-
         subgraph ComputeRG["RG-AZ104-COMPUTE"]
             MgmtVM["VM-AZ104-Management<br/>10.10.0.4"]
             WebVM["VM-AZ104-Web<br/>10.10.1.4<br/>Nginx"]
-            AppVM["VM-AZ104-App<br/>10.10.2.4<br/>Python :8080<br/>Private only"]
+            AppVM["VM-AZ104-App<br/>10.10.2.4<br/>Python :8080<br/>No public IP"]
         end
-
         subgraph StorageRG["RG-AZ104-Storage"]
-            Storage["Storage account<br/>Standard LRS, Hot"]
-            Blob["application-files<br/>Private container"]
+            SA["kishorestorage1<br/>Public access enabled"]
+            DNS["Private DNS<br/>privatelink.blob.core.windows.net"]
+            PE["PE-AZ104-Storage<br/>10.10.2.5"]
+            Blob["application-files<br/>Private"]
         end
     end
 
-    VNet --> MgmtSubnet
-    VNet --> WebSubnet
-    VNet --> AppSubnet
-    MgmtSubnet --> MgmtVM
-    WebSubnet --> WebVM
-    AppSubnet --> AppVM
+    VNet --> Mgmt
+    VNet --> Web
+    VNet --> App
+    Mgmt --> MgmtVM
+    Web --> WebVM
+    App --> AppVM
     Bastion --> MgmtVM
-    NAT --> WebSubnet
+    NAT --> Web
     NSGs --> VNet
-    MgmtVM -->|"SSH 22"| AppVM
-    WebVM -->|"HTTP 8080"| AppVM
-    AppVM --> Blob
+
+    WebVM -->|"TCP 8080"| AppVM
+    MgmtVM -->|"TCP 22"| AppVM
+
+    AppVM --> DNS
+    DNS --> PE
+    PE --> SA
+    SA --> Blob
+
     MgmtVM --> DCR
     WebVM --> DCR
     AppVM --> DCR
     DCR --> LAW
     LAW --> AG
-    Storage --> Blob
