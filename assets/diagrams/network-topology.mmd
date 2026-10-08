@@ -1,5 +1,5 @@
 flowchart LR
-    Internet["Internet / Admin client"]
+    Internet["Internet / Admin Client"]
 
     subgraph NetRG["RG-AZ104-Network"]
         VNet["VNet-AZ104-Enterprise<br/>10.10.0.0/16"]
@@ -20,7 +20,9 @@ flowchart LR
     end
 
     subgraph StorageRG["RG-AZ104-Storage"]
-        Storage["Storage account"]
+        DNS["Private DNS<br/>privatelink.blob.core.windows.net"]
+        PE["PE-AZ104-Storage<br/>10.10.2.5"]
+        SA["kishorestorage1"]
         Blob["application-files<br/>Private"]
     end
 
@@ -31,11 +33,16 @@ flowchart LR
     MgmtSubnet --> MgmtVM
     WebSubnet --> WebVM
     AppSubnet --> AppVM
+
     MgmtNSG --> MgmtSubnet
     WebNSG --> WebSubnet
     AppNSG --> AppSubnet
     NAT --> WebSubnet
+
     MgmtVM -->|"SSH 22"| AppVM
     WebVM -->|"HTTP 8080"| AppVM
-    AppVM --> Storage
-    Storage --> Blob
+
+    AppVM --> DNS
+    DNS --> PE
+    PE --> SA
+    SA --> Blob
