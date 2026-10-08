@@ -1,21 +1,28 @@
 flowchart TB
-    Admin["Admin / Owner account"]
-    Reader["reader@Kishoree.onmicrosoft.com"]
-    Client["Approved client public network path"]
+    AppVM["VM-AZ104-App<br/>10.10.2.4<br/>System-assigned Managed Identity"]
+    Reader["reader@Kishoree.onmicrosoft.com<br/>Storage Blob Data Reader"]
+    Admin["Admin / Owner"]
 
-    subgraph StorageRG["RG-AZ104-Storage"]
-        SA["Storage account<br/>Standard LRS, Hot tier"]
-        Firewall["Networking<br/>Selected VNets and IPs"]
-        BlobService["Blob service"]
-        Container["application-files<br/>Private container"]
-        Protection["Data protection<br/>Blob soft delete 7 days<br/>Container soft delete 7 days<br/>Azure Files soft delete 7 days<br/>Blob versioning disabled"]
+    subgraph Network["VNet-AZ104-Enterprise"]
+        DNS["Private DNS Zone<br/>privatelink.blob.core.windows.net"]
+        PE["PE-AZ104-Storage<br/>10.10.2.5"]
     end
 
-    Admin --> Client
-    Client --> Firewall
-    Firewall --> SA
+    subgraph Storage["RG-AZ104-Storage"]
+        SA["kishorestorage1<br/>Public network access: Enabled<br/>Selected networks / IPs"]
+        BlobService["Blob Service"]
+        Container["application-files<br/>Private container"]
+        Protection["Protection<br/>Blob soft delete: 7 days<br/>Container soft delete: 7 days<br/>Azure Files soft delete: 7 days<br/>Blob versioning: Disabled"]
+    end
+
+    AppVM -->|"DNS resolution"| DNS
+    DNS --> PE
+    PE --> SA
     SA --> BlobService
     BlobService --> Container
+
+    AppVM -->|"Entra token + Blob Data Reader"| Container
+    Reader -->|"Read / Download: Allowed"| Container
+    Reader -.->|"Upload / Delete: Denied"| Container
+    Admin --> SA
     SA --> Protection
-    Reader -->|"Storage Blob Data Reader<br/>read/download allowed"| Container
-    Reader -. "upload/delete denied with Entra auth" .-> Container
